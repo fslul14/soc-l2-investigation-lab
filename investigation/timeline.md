@@ -30,15 +30,21 @@ Indicators are defanged in prose (`[.]`, `hxxp`).
 | 21:52:45 – 21:52:47 | 17:52:45 – 17:52:47 | 40.80.148.42 | **Uploads `3791.exe` and `agent.php`** to the web root (`C:\inetpub\wwwroot\joomla\`) through eXtplorer. The server replies "Upload successful!" | Q18, Q22b |
 | 21:52:48 | 17:52:48 | 40.80.148.42 | Lists the `/joomla` directory; both new files are present (3791.exe 72.07 KB, agent.php 1.47 KB). | Q22b |
 | 21:55:22 | 17:55:22 | 23.22.63.114 | Starts calling the web shell `/joomla/agent.php` (193 requests until 22:21:34). | Q17, Q21 |
+| 21:55:22 | 17:55:22 | we1149srv | First web-shell command: `php-cgi.exe` → `cmd.exe /c "echo 24365"`, a test that command execution works. | Q29 |
+| 21:55:24 – 21:55:33 | 17:55:24 – 17:55:33 | we1149srv | Web-shell reconnaissance: `dir`, then `ls` and `ifconfig`. The last two are Linux commands that fail on Windows, which suggests the operator or tool first assumed a Linux host. | Q29 |
 | 21:56:18 | 17:56:18 | we1149srv | **`php-cgi.exe` → `cmd.exe /c "3791.exe 2>&1"` → `3791.exe` runs.** The web shell executes the uploaded payload. | Q20 |
 | 21:56:19 | 17:56:19 | we1149srv → 23.22.63.114 | `3791.exe` opens a **reverse shell** to 23.22.63.114:**3791**. | Q26, Q27 |
 | 21:58:23 | 17:58:23 | we1149srv | `3791.exe` spawns `cmd.exe` (interactive shell). | Q20 |
-| 22:06:21 | 18:06:21 | we1149srv → 23.22.63.114 | **Defacement:** `php-cgi.exe` (the web shell) downloads `poisonivy-is-coming-for-you-batman.jpeg` from hxxp://prankglassinebracket[.]jumpingcrab[.]com:1337. FortiGate categorizes the site as "Malicious Websites" and **allows** it. | Q23, Q24, Q27, Q28 |
+| 22:05:42 | 18:05:42 | we1149srv | Web shell runs `echo 63059` (another execution test). | Q29 |
+| 22:06:21 | 18:06:21 | we1149srv → 23.22.63.114 | **Image download:** `php-cgi.exe` (the web shell) downloads `poisonivy-is-coming-for-you-batman.jpeg` from hxxp://prankglassinebracket[.]jumpingcrab[.]com:1337. FortiGate categorizes the site as "Malicious Websites" and **allows** it. | Q23, Q24, Q27, Q28 |
 | 22:08:13 | 18:08:13 | we1149srv | `3791.exe` spawns `cmd.exe` again. | Q20 |
+| 22:13:26 – 22:20:13 | 18:13:26 – 18:20:13 | we1149srv | Web shell lists directories repeatedly (`dir` at 22:13:26, 22:15:52, 22:16:47, 22:19:14, 22:19:22, 22:19:48, 22:20:13). | Q29 |
 | 22:13:46 | 18:13:46 | we1149srv → 23.22.63.114 | Second download of the defacement image. | Q28 |
 | 22:19:10 – 22:19:11 | 18:19:10 – 18:19:11 | we1149srv → 23.22.63.114 | Third download of the image (last `php-cgi.exe` connection to port 1337). | Q27, Q28 |
+| 22:20:10 | 18:20:10 | we1149srv | **`move ..\1.jpeg 2.jpeg`**: the downloaded image (most likely saved as `1.jpeg`) is moved in from the parent folder. | Q29 |
+| 22:20:33 | 18:20:33 | we1149srv | **`move 2.jpeg imnotbatman.jpg`**: the image replaces the site's `imnotbatman.jpg`. **This is the defacement.** | Q29 |
 | 22:21:18 | 18:21:18 | 40.80.148.42 (IE11) | Attacker views the public site `/joomla/`, likely checking the defacement. | Q13 |
-| 22:21:34 | 18:21:34 | 23.22.63.114 | Last web-shell request. | Q21 |
+| 22:21:31 – 22:21:34 | 18:21:31 – 18:21:34 | we1149srv / 23.22.63.114 | Web shell runs `exit` twice; the last `agent.php` request is at 22:21:34. | Q21, Q29 |
 | 22:22:27 | 18:22:27 | 40.80.148.42 | Last traffic from the scanner/operator IP. | Q7 |
 
 ## Duration
@@ -46,11 +52,11 @@ Indicators are defanged in prose (`[.]`, `hxxp`).
 - **Scan to admin access:** 11 minutes 20 seconds (21:36:45 → 21:48:05).
 - **Brute force:** about 90 seconds.
 - **Admin access to code execution:** 8 minutes 13 seconds (21:48:05 → 21:56:18).
-- **First request to defacement:** about 29.5 minutes.
+- **First request to image download:** about 29.5 minutes. To the file overwrite that defaced the site (22:20:33): about 44 minutes.
 
 ## Evidence gaps (stated, not guessed)
 
 - **Which extension package the 17:50:31 install used.** The request recorded a file named `agent.php`, and eXtplorer appears a minute later. The logs don't show the package itself.
-- **How the image was placed on the page.** Sysmon recorded `php-cgi.exe` connecting to port 1337 but logged no file-write event naming the image (Q25). Network logs prove the server pulled the image; they don't show which page file was changed.
-- **What was typed in the 3791.exe shells.** Sysmon shows `cmd.exe` launched at 21:58:23 and 22:08:13 UTC. The commands inside the reverse shell aren't logged.
+- **Where the downloaded image was first saved.** PHP downloaded the image itself, so no process event shows the download, and Sysmon logged no file-write naming it (Q25). The later `move ..\1.jpeg 2.jpeg` and `move 2.jpeg imnotbatman.jpg` commands (Q29) show the image replacing the site's `imnotbatman.jpg`. That `1.jpeg` is the downloaded file is an inference from timing, not logged directly. The full folder paths aren't logged either, because the commands are relative to the web shell's working directory.
+- **What was typed in the 3791.exe shells.** Sysmon shows `cmd.exe` launched at 21:58:23 and 22:08:13 UTC. The commands inside the reverse shell aren't logged; only web-shell commands are, because each one starts a new `cmd.exe /c`.
 - **Visitor-side impact.** This is the attack-only dataset with little benign traffic, so there are no logged visitor requests for the defaced page (Q28).

@@ -18,3 +18,5 @@ user_agent,"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
 string,acunetix_wvs_security_test,"Acunetix payload marker seen in fuzzed HTTP headers",2016-08-10T21:36:45Z,2016-08-10T22:22:27Z,"Q8 Q9",high,no
 av_signature,W32/Swrort.C!tr,"FortiGate AV detection name for 3791.exe (action=monitored, not blocked)",2016-08-10T21:52:45Z,2016-08-10T21:52:45Z,Q22b,high,no
 account,admin (Joomla),"Compromised CMS administrator account; password guessed by dictionary attack",2016-08-10T21:48:05Z,2016-08-10T22:21:18Z,"Q11b Q12 Q13",high,no
+behavior,"php-cgi.exe -> cmd.exe /c ""<command> 2>&1""","Web-shell command pattern on we1149srv (17 commands incl. 3791.exe and the move into imnotbatman.jpg); hunt for this parent/child pair",2016-08-10T21:55:22Z,2016-08-10T22:21:34Z,Q29,high,no
+filename,imnotbatman.jpg,"Site image overwritten with the defacement image by the web shell (victim file: restore from backup)",2016-08-10T22:20:33Z,2016-08-10T22:20:33Z,Q29,high,no

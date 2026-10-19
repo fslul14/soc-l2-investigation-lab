@@ -1,0 +1,31 @@
+title: Acunetix Scanner Payload Marker in HTTP Request
+id: c4bf7904-e9b3-4b56-91f8-d3fe4159f259
+status: experimental
+description: |
+  Detects HTTP requests carrying the marker that Acunetix Web Vulnerability Scanner
+  injects while fuzzing inputs (for example "acunetix_wvs_security_test" inside a
+  print(md5(...)) payload). In the BOTS v1 incident the scanner fuzzed the
+  User-Agent header with these payloads while its normal user agent looked like Chrome,
+  so matching the marker is more reliable than matching a scanner user agent.
+references:
+  - https://github.com/splunk/botsv1
+author: Frenki (drafted with Claude)
+date: 2026-10-19
+tags:
+  - attack.reconnaissance
+  - attack.t1595.002
+logsource:
+  category: webserver
+detection:
+  selection_user_agent:
+    cs-user-agent|contains: 'acunetix'
+  selection_url:
+    cs-uri-query|contains: 'acunetix'
+  condition: 1 of selection_*
+fields:
+  - c-ip
+  - cs-uri-stem
+  - cs-user-agent
+falsepositives:
+  - Authorized vulnerability scans by your own security team (allow-list their scanner source IPs)
+level: medium

@@ -1,0 +1,9 @@
+﻿
+Name: sigma-cli
+Version: 3.1.0
+Name: pySigma
+Version: 1.5.1
+Name: pysigma-backend-splunk
+Version: 2.1.0
+
+

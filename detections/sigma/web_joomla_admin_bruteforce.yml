@@ -1,0 +1,54 @@
+title: Joomla Administrator Login Attempt
+id: eeeb35be-ad29-4ea5-a23c-7b1b9504ca03
+name: joomla_admin_login_attempt
+status: experimental
+description: |
+  One login form submission to the Joomla administrator panel. On its own this is
+  normal admin activity; it is the building block for the brute-force correlation
+  rule below, which alerts when one source submits many logins in a short window.
+references:
+  - https://github.com/splunk/botsv1
+author: Frenki (drafted with Claude)
+date: 2026-10-19
+tags:
+  - attack.credential-access
+  - attack.t1110.001
+logsource:
+  category: webserver
+detection:
+  selection:
+    cs-method: 'POST'
+    cs-uri-stem|endswith: '/administrator/index.php'
+    form_data|contains|all:
+      - 'option=com_login'
+      - 'task=login'
+  condition: selection
+falsepositives:
+  - Legitimate administrator logins (expected; this rule is not meant to alert by itself)
+level: informational
+---
+title: Joomla Administrator Brute Force from a Single Source
+id: 2c473f4a-0c88-4d8f-8662-4ef743969245
+status: experimental
+description: |
+  Alerts when one source IP submits 20 or more Joomla administrator login attempts
+  within 5 minutes. In BOTS v1 the attacker sent 412 attempts in about 90 seconds and
+  the IDS raised no alert.
+author: Frenki (drafted with Claude)
+date: 2026-10-19
+tags:
+  - attack.credential-access
+  - attack.t1110.001
+correlation:
+  type: event_count
+  rules:
+    - joomla_admin_login_attempt
+  group-by:
+    - c-ip
+  timespan: 5m
+  condition:
+    gte: 20
+falsepositives:
+  - Monitoring or uptime checks that log in to the admin panel (allow-list their source IPs)
+  - A user repeatedly mistyping a password (normally far below 20 attempts in 5 minutes)
+level: high

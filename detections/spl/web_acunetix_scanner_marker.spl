@@ -1,0 +1,1 @@
+index="botsv1" sourcetype="stream:http" http_user_agent="*acunetix*" OR uri="*acunetix*" | table src_ip,uri_path,http_user_agent

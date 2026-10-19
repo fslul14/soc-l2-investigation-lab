@@ -17,3 +17,6 @@ exports/
 Thumbs.db
 desktop.ini
 .vscode/
+
+# SPL search files are content, not Splunk app packages
+!detections/spl/*.spl

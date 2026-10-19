@@ -1,0 +1,1 @@
+index="botsv1" source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1 ParentImage IN ("*\\php-cgi.exe", "*\\php.exe", "*\\w3wp.exe", "*\\httpd.exe") Image IN ("*\\cmd.exe", "*\\powershell.exe", "*\\pwsh.exe") | table host,ParentImage,Image,CommandLine

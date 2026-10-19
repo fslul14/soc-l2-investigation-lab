@@ -1,0 +1,46 @@
+# pySigma processing pipeline: maps generic Sigma fields to the BOTS v1 data as it looks
+# in this lab (Splunk 10.6.1.1 with the add-ons listed in the README).
+#
+#   webserver rules        -> index=botsv1 sourcetype=stream:http (Splunk Stream wire data)
+#   process_creation rules -> index=botsv1 Sysmon source, EventID 1
+#
+# Sysmon caveat: in this lab the Sysmon add-on did not extract fields for the renamed
+# sourcetype, so the converted Sysmon search needs rex extraction added in front of it.
+# See detections/spl/win_webserver_spawns_shell.spl and detections/test-results.md.
+name: BOTS v1 lab field mapping
+priority: 100
+transformations:
+  # --- Web server rules -> Splunk Stream HTTP ---
+  - id: web_fields
+    type: field_name_mapping
+    mapping:
+      cs-method: http_method
+      cs-uri-stem: uri_path
+      cs-uri-query: uri
+      cs-user-agent: http_user_agent
+      c-ip: src_ip
+      sc-status: status
+      cs-host: site
+    rule_conditions:
+      - type: logsource
+        category: webserver
+  - id: web_source
+    type: add_condition
+    conditions:
+      index: botsv1
+      sourcetype: 'stream:http'
+    rule_conditions:
+      - type: logsource
+        category: webserver
+
+  # --- Windows process creation -> Sysmon event ID 1 ---
+  - id: sysmon_source
+    type: add_condition
+    conditions:
+      index: botsv1
+      source: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'
+      EventID: 1
+    rule_conditions:
+      - type: logsource
+        category: process_creation
+        product: windows

@@ -13,11 +13,12 @@ Confidence:
 | Initial Access | **T1078** Valid Accounts | The guessed credential (`admin`/`batman`) was used from 40.80.148.42 to log in to the CMS admin panel. | Q12, Q13, Q23 (update check on dashboard load) | High |
 | Persistence | **T1505.003** Server Software Component: Web Shell | `agent.php` was uploaded to the web root and called 193 times by 23.22.63.114. PHP then launched commands and outbound connections. | Q17, Q21, Q22b, Q20 (php-cgi → cmd), Q27 | High |
 | Command and Control | **T1105** Ingress Tool Transfer | `3791.exe` and `agent.php` were uploaded to the server, and the server later pulled the defacement image from attacker infrastructure. | Q18, Q22b, Q23, Q27 | High |
-| Execution | **T1059.003** Command and Scripting Interpreter: Windows Command Shell | `php-cgi.exe` ran `cmd.exe /c "3791.exe 2>&1"`, and `3791.exe` later spawned `cmd.exe` twice. | Q20 | High |
+| Execution | **T1059.003** Command and Scripting Interpreter: Windows Command Shell | The web shell ran 17 commands as `cmd.exe /c "<command> 2>&1"` (including `3791.exe`), and `3791.exe` later spawned `cmd.exe` twice. | Q20, Q29 | High |
 | Command and Control | **T1071.001** Application Layer Protocol: Web Protocols | The web shell was controlled over HTTP GET requests to `/joomla/agent.php`. | Q17, Q21 | High |
 | Command and Control | **T1571** Non-Standard Port | Reverse shell to 23.22.63.114 on tcp/3791; image server on tcp/1337. | Q23, Q24, Q26, Q27 | High |
-| Discovery | **T1083** File and Directory Discovery | The attacker listed the web root through eXtplorer (`getdircontents`, dir=/joomla). | Q22b | Medium |
-| Impact | **T1491.002** Defacement: External Defacement | The web shell fetched `poisonivy-is-coming-for-you-batman.jpeg` from prankglassinebracket[.]jumpingcrab[.]com:1337, matching the reported defacement. | Q23, Q24, Q27, Q28, ticket INC-0001 | High (fetch) / Medium (page change; see evidence gaps) |
+| Discovery | **T1083** File and Directory Discovery | The attacker listed the web root through eXtplorer (`getdircontents`, dir=/joomla) and ran `dir`/`ls` repeatedly through the web shell. | Q22b, Q29 | High |
+| Discovery | **T1016** System Network Configuration Discovery | The web shell ran `ifconfig` (a Linux command that fails on Windows), an attempt to read network configuration. | Q29 | Medium (attempted) |
+| Impact | **T1491.002** Defacement: External Defacement | The web shell fetched `poisonivy-is-coming-for-you-batman.jpeg` from prankglassinebracket[.]jumpingcrab[.]com:1337, then ran `move 2.jpeg imnotbatman.jpg` to overwrite the site's image. | Q23, Q24, Q27, Q28, Q29, ticket INC-0001 | High |
 
 ## Considered and not mapped
 

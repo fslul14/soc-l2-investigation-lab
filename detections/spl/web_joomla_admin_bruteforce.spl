@@ -1,0 +1,6 @@
+index="botsv1" sourcetype="stream:http" http_method="POST" uri_path="*/administrator/index.php" form_data="*option=com_login*" form_data="*task=login*"
+
+| bin _time span=5m
+| stats count as event_count by _time src_ip
+
+| search event_count >= 20

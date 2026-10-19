@@ -215,3 +215,26 @@ Found: **`php-cgi.exe` connected to 23.22.63.114:1337** three times (18:06:22–
 index=botsv1 earliest=0 "poisonivy-is-coming-for-you-batman.jpeg" | stats count min(_time) as first max(_time) as last by sourcetype, src_ip, dest_ip | convert ctime(first) ctime(last)
 ```
 Found: only the server's own downloads from 23.22.63.114 (fortigate_utm 3, stream:http 2, suricata 3 + 1 reply), 18:06:21–18:19:11 EDT. No visitor requests for the image were captured, so the logs show the image being pulled, not the page being viewed.
+
+---
+
+## Follow-up hunt from detection testing
+
+### Q29. Every command the web shell ran (AI-WRITTEN; the adapted Rule 3 search from `detections/`)
+```spl
+index="botsv1" source="WinEventLog:Microsoft-Windows-Sysmon/Operational" ("php-cgi.exe" OR "php.exe" OR "w3wp.exe" OR "httpd.exe")
+| rex "<EventID>(?<EventID>\d+)</EventID>"
+| rex "<Data Name='ParentImage'>(?<ParentImage>[^<]+)</Data>"
+| rex "<Data Name='Image'>(?<Image>[^<]+)</Data>"
+| rex "<Data Name='CommandLine'>(?<CommandLine>[^<]+)</Data>"
+| search EventID=1 ParentImage IN ("*\\php-cgi.exe", "*\\php.exe", "*\\w3wp.exe", "*\\httpd.exe") Image IN ("*\\cmd.exe", "*\\powershell.exe", "*\\pwsh.exe")
+| table _time host ParentImage Image CommandLine
+```
+Found: 17 commands, all `php-cgi.exe` → `cmd.exe /c "<command> 2>&1"` on we1149srv, 17:55:22–18:21:34 EDT:
+- **Tests and reconnaissance:** `echo 24365`, `dir`, `ls`, `ifconfig`, `echo 63059`.
+- **Payload execution:** `3791.exe`.
+- **Directory listings:** `dir`, repeatedly.
+- **The defacement:** `move ..\1.jpeg 2.jpeg` (18:20:10) and **`move 2.jpeg imnotbatman.jpg`** (18:20:33).
+- **Cleanup:** `exit` twice.
+
+This shows exactly how the site image was replaced, which closes most of the evidence gap left by Q25.

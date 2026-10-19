@@ -1,0 +1,41 @@
+title: Web Server Process Spawns a Command Shell
+id: b186a877-43b6-462a-91ff-8cc5b5d4d447
+status: experimental
+description: |
+  Detects a web server or web scripting process (PHP CGI, IIS worker) starting a
+  command shell. Web servers serve pages; when they launch cmd.exe or PowerShell,
+  a web shell is the usual explanation. In BOTS v1, php-cgi.exe ran
+  cmd.exe /c "3791.exe 2>&1" to start the uploaded reverse-shell payload.
+references:
+  - https://github.com/splunk/botsv1
+author: Frenki (drafted with Claude)
+date: 2026-10-19
+tags:
+  - attack.persistence
+  - attack.t1505.003
+  - attack.execution
+  - attack.t1059.003
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_parent:
+    ParentImage|endswith:
+      - '\php-cgi.exe'
+      - '\php.exe'
+      - '\w3wp.exe'
+      - '\httpd.exe'
+  selection_child:
+    Image|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  condition: all of selection_*
+fields:
+  - host
+  - ParentImage
+  - Image
+  - CommandLine
+falsepositives:
+  - Web applications that legitimately shell out (some CMS backup or image plugins); review the command line and allow-list known-good ones
+level: high

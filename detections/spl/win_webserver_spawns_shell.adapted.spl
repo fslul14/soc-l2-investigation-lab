@@ -1,0 +1,7 @@
+index="botsv1" source="WinEventLog:Microsoft-Windows-Sysmon/Operational" ("php-cgi.exe" OR "php.exe" OR "w3wp.exe" OR "httpd.exe")
+| rex "<EventID>(?<EventID>\d+)</EventID>"
+| rex "<Data Name='ParentImage'>(?<ParentImage>[^<]+)</Data>"
+| rex "<Data Name='Image'>(?<Image>[^<]+)</Data>"
+| rex "<Data Name='CommandLine'>(?<CommandLine>[^<]+)</Data>"
+| search EventID=1 ParentImage IN ("*\\php-cgi.exe", "*\\php.exe", "*\\w3wp.exe", "*\\httpd.exe") Image IN ("*\\cmd.exe", "*\\powershell.exe", "*\\pwsh.exe")
+| table _time host ParentImage Image CommandLine
