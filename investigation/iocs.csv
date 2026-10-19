@@ -1,0 +1,20 @@
+type,value,context,first_seen_utc,last_seen_utc,evidence,confidence,enrich
+ip,40.80.148.42,"Acunetix vulnerability scan; admin login with brute-forced credentials; uploaded 3791.exe and agent.php via eXtplorer",2016-08-10T21:36:45Z,2016-08-10T22:22:27Z,"Q7 Q8 Q9 Q12 Q13 Q22b",high,yes
+ip,23.22.63.114,"Admin brute force (412 passwords); controlled agent.php web shell; reverse-shell C2 on tcp/3791; hosted defacement image on tcp/1337",2016-08-10T21:45:09Z,2016-08-10T22:21:35Z,"Q7 Q11b Q21 Q23 Q26 Q27",high,yes
+domain,prankglassinebracket.jumpingcrab.com,"Hostname serving the defacement image (resolved to 23.22.63.114, port 1337); FortiGate category Malicious Websites",2016-08-10T22:06:21Z,2016-08-10T22:19:11Z,"Q23 Q24 Q28",high,yes
+url,http://prankglassinebracket.jumpingcrab.com:1337/poisonivy-is-coming-for-you-batman.jpeg,"Defacement image downloaded by the web server (php-cgi.exe)",2016-08-10T22:06:21Z,2016-08-10T22:19:11Z,"Q23 Q24 Q27 Q28",high,yes
+url,http://imreallynotbatman.com/joomla/agent.php,"Web shell location on the victim site (victim URL; not attacker infrastructure)",2016-08-10T21:55:22Z,2016-08-10T22:21:34Z,"Q17 Q21",high,no
+sha256,EC78C938D8453739CA2A370B9C275971EC46CAF6E479DE2B2D04E97CC47FA45D,"3791.exe reverse-shell payload; FortiGate W32/Swrort.C!tr; SHA256 matched by Sysmon and FortiGate",2016-08-10T21:52:45Z,2016-08-10T22:08:13Z,"Q20 Q22b",high,yes
+sha1,65DF73D77324D008C83C3E57B445DF0FD43A3A51,"3791.exe (same file as SHA256)",2016-08-10T21:56:18Z,2016-08-10T22:08:13Z,Q20,high,no
+md5,AAE3F5A29935E6ABCC2C2754D12A9AF0,"3791.exe (same file as SHA256)",2016-08-10T21:56:18Z,2016-08-10T22:08:13Z,Q20,high,no
+imphash,481F47BBB2C9C21E108D65F52B04C448,"3791.exe import hash (useful for finding related builds)",2016-08-10T21:56:18Z,2016-08-10T22:08:13Z,Q20,medium,no
+filename,3791.exe,"Payload dropped to C:\inetpub\wwwroot\joomla\3791.exe; executed by php-cgi.exe via cmd.exe",2016-08-10T21:52:45Z,2016-08-10T22:08:13Z,"Q18 Q20 Q22b",high,no
+filename,agent.php,"PHP web shell uploaded to the Joomla web root (1.47 KB); no hash available in logs",2016-08-10T21:50:31Z,2016-08-10T22:21:34Z,"Q14 Q17 Q21 Q22b",high,no
+network,23.22.63.114:3791/tcp,"Reverse-shell callback from 3791.exe",2016-08-10T21:56:19Z,2016-08-10T21:56:19Z,"Q26 Q27",high,no
+network,23.22.63.114:1337/tcp,"Defacement image server contacted by php-cgi.exe",2016-08-10T22:06:22Z,2016-08-10T22:19:11Z,Q27,high,no
+user_agent,Python-urllib/2.7,"Brute-force and web-shell client from 23.22.63.114 (common library UA: weak alone)",2016-08-10T21:45:09Z,2016-08-10T22:21:34Z,"Q9 Q21",low,no
+user_agent,"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21","Acunetix scanner traffic from 40.80.148.42",2016-08-10T21:36:45Z,2016-08-10T22:22:27Z,Q9,medium,no
+user_agent,"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko","Attacker's interactive browser (IE11) from 40.80.148.42 (very common UA: weak alone)",2016-08-10T21:48:00Z,2016-08-10T22:21:18Z,"Q9 Q13",low,no
+string,acunetix_wvs_security_test,"Acunetix payload marker seen in fuzzed HTTP headers",2016-08-10T21:36:45Z,2016-08-10T22:22:27Z,"Q8 Q9",high,no
+av_signature,W32/Swrort.C!tr,"FortiGate AV detection name for 3791.exe (action=monitored, not blocked)",2016-08-10T21:52:45Z,2016-08-10T21:52:45Z,Q22b,high,no
+account,admin (Joomla),"Compromised CMS administrator account; password guessed by dictionary attack",2016-08-10T21:48:05Z,2016-08-10T22:21:18Z,"Q11b Q12 Q13",high,no
