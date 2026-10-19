@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets: API keys live in environment variables, never in files
+.env
+*.env
+
+# Raw Splunk data, archives and exports never get committed
+*.tgz
+*.spl
+*.msi
+exports/
+
+# OS / editor clutter
+Thumbs.db
+desktop.ini
+.vscode/
